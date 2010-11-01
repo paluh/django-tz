@@ -19,36 +19,38 @@ Assume that we have Profile model which contains ,,timezone'' field and MeetUp m
 
 <pre>
 <code>
-    class Profile(models.Model):
-        user = models.ForeignKey(User)
-        timezone = models.TimeZoneField()
+class Profile(models.Model):
+    user = models.ForeignKey(User)
+    timezone = models.TimeZoneField()
 
-    class MeetUp(models.Model):
-        start = models.DatetTimeField()
+class MeetUp(models.Model):
+    start = models.DatetTimeField()
 </code>
 </pre>
 
 Now we want to switch timezone according to user settings for every request. This can be done through simple middleware:
+
 <pre>
 <code>
-    class TimezoneMiddleware(object):
-        def _get_timezone_from_request(self, request):
-            if hasattr(request, 'user') and request.user.is_authenticated():
-                profile = request.user.get_profile()
-                return profile.timezone
-            return pytz.timezone(settings.TIME_ZONE)
+class TimezoneMiddleware(object):
+    def _get_timezone_from_request(self, request):
+        if hasattr(request, 'user') and request.user.is_authenticated():
+            profile = request.user.get_profile()
+            return profile.timezone
+        return pytz.timezone(settings.TIME_ZONE)
 
-        def process_request(self, request):
-            tz = self._get_timezone_from_request(request)
-            global_tz.activate(tz)
+    def process_request(self, request):
+        tz = self._get_timezone_from_request(request)
+        global_tz.activate(tz)
 
-        def process_response(self, request, response):
-            global_tz.deactivate()
-            return response
+    def process_response(self, request, response):
+        global_tz.deactivate()
+        return response
 </code>
 </pre>
 
 When you want display your meet ups in template you can use to_global_tz filter which converts it to currently used timezone:
+
 <pre>
 <code>
 {% load django_tz_tags %}
