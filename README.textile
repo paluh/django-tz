@@ -12,6 +12,7 @@ This app is derived from brosner/django-timezones application (http://github.com
 * It implements template filter to localize datetime values according to cache.
 
 h2. USAGE
+
 h3. Example:
 
 Assume that we have Profile model which contains ,,timezone'' field and MeetUp model with ,,start'' field:
@@ -77,19 +78,17 @@ class MeetUpForm(forms.ModelForm):
 </code>
 </pre>
 
-h3. Settings
-The best timezone for datetimes values which are kept in database is UTC because it doesn't use DST (Daylight Saving Time), it's often
+h3. Use UTC
+
+From pytz docs:
+,,<<UTC>> is Universal Time, also known as Greenwich Mean Time or GMT in the United Kingdom. All other timezones are given as offsets from UTC. No daylight savings time occurs in UTC, making it a useful timezone to perform date arithmetic without worrying about the confusion and ambiguities caused by daylight savings time transitions, your country changing its timezone, or mobile computers that move roam through multiple timezones.''
 
 <pre>
 <code>
-#database timezone
 TIME_ZONE='UTC'
 </code>
 </pre>
 
 h2. TESTING
-Add django_tz to INSTALLED_APPS and run ./manage.py test django_tz.
 
-h2. TODO
-* add DST support
-* example project
+Add django_tz to INSTALLED_APPS and run ./manage.py test django_tz.
