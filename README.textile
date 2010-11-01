@@ -8,7 +8,7 @@ This app is derived from brosner/django-timezones application (http://github.com
 
 * It defines TimeZoneField which is taken from django-timezones (I've added default value guessing based on language code).
 * It provides global (per thread) timezone cache which can be easly updated by custom middleware.
-* It defines LocalizedDateTimeField (+ some additional form fields) - which makes transitions from settings.TIME_ZONE to current timezone from cache and backward.
+* It defines LocalizedDateTimeField (+ some additional form fields) - which makes automatically transitions: settings.TIME_ZONE <-> current timezone.
 * It implements template filter to localize datetime values according to cache.
 
 h2. USAGE
@@ -59,7 +59,7 @@ When you want display your meet ups in template you can use to_global_tz filter 
 </code>
 </pre>
 
-In forms you should use LocalizedDateTimeField (or it's splited version), which is multi value field (datettime + timezone):
+In forms you should use LocalizedDateTimeField (or it's split version), which is multi value field (datettime + timezone):
 
 <pre>
 <code>
@@ -83,7 +83,7 @@ class MeetUpForm(forms.ModelForm):
 h3. Use UTC
 
 From pytz docs:
-,,<<UTC>> is Universal Time, also known as Greenwich Mean Time or GMT in the United Kingdom. All other timezones are given as offsets from UTC. No daylight savings time occurs in UTC, making it a useful timezone to perform date arithmetic without worrying about the confusion and ambiguities caused by daylight savings time transitions, your country changing its timezone, or mobile computers that move roam through multiple timezones.''
+,,UTC is Universal Time, also known as Greenwich Mean Time or GMT in the United Kingdom. All other timezones are given as offsets from UTC. No daylight savings time occurs in UTC, making it a useful timezone to perform date arithmetic without worrying about the confusion and ambiguities caused by daylight savings time transitions, your country changing its timezone, or mobile computers that move roam through multiple timezones.''
 
 <pre>
 <code>
