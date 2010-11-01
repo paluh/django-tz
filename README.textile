@@ -2,7 +2,9 @@ h1. django_tz
 
 h2. OVERVIEW
 
-This app is derived from brosner/django-timezones application (http://github.com/brosner/django-timezones), but it takes different approach to timezones localization (so I've separted those two apps for clarity). It implements global cache (similar to django.translation) and localizes values (in forms and templates) according to it's content.
+This app is derived from brosner/django-timezones application (http://github.com/brosner/django-timezones). It takes different approach to timezones localization, so I've separated those two apps for clarity.
+
+It treats timezones in similar manner like django treats languages. Timezone is stored in global cache and datetime values can be ,,localized'' according to it in templates by custom template filter or durging request processing through custom form fields.
 
 ,,What does this application do?''
 
