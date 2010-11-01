@@ -1,0 +1,95 @@
+h1. django_tz
+
+h2. OVERVIEW
+
+This app is derived from brosner/django-timezones application (http://github.com/brosner/django-timezones), but it takes different approach to timezones localization (so I've separted those two apps for clarity). It implements global cache (similar to django.translation) and localizes values (in forms and templates) according to it's content.
+
+,,What does this application do?''
+
+* It defines TimeZoneField which is taken from django-timezones (I've added default value guessing based on language code).
+* It provides global (per thread) timezone cache which can be easly updated by custom middleware.
+* It defines LocalizedDateTimeField (+ some additional form fields) - which makes transitions from settings.TIME_ZONE to current timezone from cache and backward.
+* It implements template filter to localize datetime values according to cache.
+
+h2. USAGE
+h3. Example:
+
+Assume that we have Profile model which contains ,,timezone'' field and MeetUp model with ,,start'' field:
+
+<pre>
+<code>
+    class Profile(models.Model):
+        user = models.ForeignKey(User)
+        timezone = models.TimeZoneField()
+
+    class MeetUp(models.Model):
+        start = models.DatetTimeField()
+</code>
+</pre>
+
+Now we want to switch timezone according to user settings for every request. This can be done through simple middleware:
+<pre>
+<code>
+class TimezoneMiddleware(object):
+    def _get_timezone_from_request(self, request):
+        if hasattr(request, 'user') and request.user.is_authenticated():
+            profile = request.user.get_profile()
+            return profile.timezone
+        return pytz.timezone(settings.TIME_ZONE)
+
+    def process_request(self, request):
+        tz = self._get_timezone_from_request(request)
+        global_tz.activate(tz)
+
+    def process_response(self, request, response):
+        global_tz.deactivate()
+        return response
+</code>
+</pre>
+
+When you want display your meet ups in template you can use to_global_tz filter which converts it to currently used timezone:
+<pre>
+<code>
+{% load django_tz_tags %}
+
+{{ meetup.start|to_global_tz }}
+</code>
+</pre>
+
+In forms you should use LocalizedDateTimeField (or it's splited version), which is multi value field (datettime + timezone):
+
+<pre>
+<code>
+class MeetUpForm(forms.ModelForm):
+    start = LocalizedDateTimeField()
+    class Model:
+        model = MeetUp
+</code>
+</pre>
+
+I think that in most cases you don't want to show timezone subfield to the user. To hide it use HiddenInput widget:
+
+<pre>
+<code>
+class MeetUpForm(forms.ModelForm):
+    start = LocalizedDateTimeField(timezone_widget=widgets.HiddenInput)
+    ...
+</code>
+</pre>
+
+h3. Settings
+The best timezone for datetimes values which are kept in database is UTC because it doesn't use DST (Daylight Saving Time), it's often
+
+<pre>
+<code>
+#database timezone
+TIME_ZONE='UTC'
+</code>
+</pre>
+
+h2. TESTING
+Add django_tz to INSTALLED_APPS and run ./manage.py test django_tz.
+
+h2. TODO
+* add DST support
+* example project
