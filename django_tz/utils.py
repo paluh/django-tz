@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.encoding import smart_str
+from django.utils import translation
 
 import pytz
 
@@ -31,10 +32,8 @@ def validate_timezone_max_length(max_length, zones):
         raise Exception("timezones.fields.TimeZoneField MAX_TIMEZONE_LENGTH is too small")
 
 def guess_tz_from_lang(language_code):
-    language_code = translation.get_language()
-    if '-' in language_code:
-        country_code = language_code.split('-', 1)[1]
-        if country_code in pytz.country_timezones:
-            return pytz.country_timezones[country_code][0]
-    return pytz.timezone(settings.TIME_ZONE)
+    country_code = language_code.split('-', 1)[1] if '-' in language_code else language_code
+    if country_code in pytz.country_timezones:
+        return pytz.country_timezones[country_code][0]
+    return None
 

@@ -9,13 +9,16 @@ from django.conf import settings
 from django.db import models
 from django.forms.models import model_to_dict
 from django.forms.widgets import HiddenInput
+from django.http import HttpRequest
 from django.test import TestCase
+from django.utils import translation
 
 from .fields import TimeZoneField
 from . import forms as tz_forms
 from . import global_tz
+from . import middleware
 
-from timezones.utils import adjust_datetime_to_timezone
+from .utils import adjust_datetime_to_timezone, guess_tz_from_lang
 
 #model for tests
 class Profile(models.Model):
@@ -47,6 +50,19 @@ class UtilsTestCase(TimeZoneTestCase):
             ).strftime("%m/%d/%Y %H:%M:%S"),
             "06/25/2008 18:00:00"
         )
+
+    def test_tz_guessing(self):
+        try:
+            request = HttpRequest()
+            request.META['HTTP_ACCEPT_LANGUAGE'] = 'en-ca,en;q=0.8,en-us;q=0.6,de-de;q=0.4,de;q=0.2'
+            middleware.TimezoneMiddleware().process_request(request)
+            self.assertEqual(global_tz.get_timezone(), pytz.country_timezones['ca'][0])
+
+            request.META['HTTP_ACCEPT_LANGUAGE'] = 'pl,en;q=0.8,en-us;q=0.6,de-de;q=0.4,de;q=0.2'
+            middleware.TimezoneMiddleware().process_request(request)
+            self.assertEqual(global_tz.get_timezone(), pytz.country_timezones['pl'][0])
+        finally:
+            global_tz.deactivate()
 
 class TimeZoneFieldTestCase(TimeZoneTestCase):
     def test_forms_clean_required(self):
