@@ -4,7 +4,7 @@ h2. OVERVIEW
 
 This app is derived from brosner/django-timezones application (http://github.com/brosner/django-timezones). It takes different approach to timezones localization, so I've separated those two apps for clarity.
 
-django-tz treats timezones transitions in similar manner like django treats languages localization. Timezone is stored in global cache and datetime values can be ,,localized'' according to it in templates with custom template filter or in forms with custom form fields.
+django-tz manages timezones transitions in a manner similar to how django implements language switching. Timezone is stored in global cache and datetime values can be ,,localized'' according to it in templates with custom template filter or in forms with custom form fields.
 
 ,,What does this application do?''
 
