@@ -68,11 +68,17 @@ class TimeZoneDateTimeField(MultiValueField):
         return None
 
 class LocalizedDateTimeWidget(TimeZoneDateTimeWidget):
+    def __init__(self, *args, **kwargs):
+        self.get_timezone = kwargs.get('get_timezone',
+                    lambda value: global_tz.get_timezone())
+        super(LocalizedDateTimeWidget, self).__init__(*args, **kwargs)
+
     def decompress(self, value):
         if value:
             if not value.tzinfo:
                 value = pytz.timezone(settings.TIME_ZONE).localize(value)
-            value = adjust_datetime_to_timezone(value, value.tzinfo, global_tz.get_timezone())
+            tz = self.get_timezone(value)
+            value = adjust_datetime_to_timezone(value, value.tzinfo, tz)
         return super(LocalizedDateTimeWidget, self).decompress(value)
 
 class LocalizedDateTimeField(TimeZoneDateTimeField):
