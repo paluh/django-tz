@@ -23,7 +23,7 @@ def get_tz_from_request(request):
 
     return None
 
-class TimezoneMiddleware(object):
+class GlobalTimezoneMiddleware(object):
     """
     This middleware guesses timezone from language and sets it in current
     thread global cache.
@@ -40,7 +40,7 @@ class TimezoneMiddleware(object):
         global_tz.deactivate()
         return response
 
-class TimezoneFromLangMiddleware(TimezoneMiddleware):
+class TimezoneFromLangMiddleware(GlobalTimezoneMiddleware):
     """
     Not very smart middelware which guesses timezone from request lang setting.
     """

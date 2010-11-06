@@ -10,8 +10,9 @@ django-tz manages timezones transitions in a manner similar to how django implem
 
 * It defines TimeZoneField which is taken from django-timezones (I've added default value guessing based on language code).
 * It provides global (per thread) timezone cache which can be easily updated by custom middleware.
-* It defines LocalizedDateTimeField (+ some additional form fields) - which makes automatically transitions: settings.TIME_ZONE <-> current timezone.
+* It defines LocalizedDateTimeField (+ some additional form fields) - which makes automatically transitions: settings.TIME_ZONE <--> current timezone.
 * It implements template filter to localize datetime values according to cache.
+* It defines set_timezone view which stores given timezone in session or cookie.
 
 h2. HOW IT WORKS
 
@@ -46,20 +47,18 @@ Now we want to switch timezone according to user settings for every request. Thi
 
 <pre>
 <code>
-class TimezoneMiddleware(object):
-    def _get_timezone_from_request(self, request):
+from django_tz.middleware import GlobalTimezoneMiddleware, get_
+
+class ProfileTimezoneMiddleware(GlobalTimezoneMiddleware):
+    def get_tz(sefl, request):
         if hasattr(request, 'user') and request.user.is_authenticated():
             profile = request.user.get_profile()
             return profile.timezone
-        return pytz.timezone(settings.TIME_ZONE)
 
-    def process_request(self, request):
-        tz = self._get_timezone_from_request(request)
-        global_tz.activate(tz)
+        #try current session timezone setting at first
+        tz = get_tz_from_request(request)
+        return tz
 
-    def process_response(self, request, response):
-        global_tz.deactivate()
-        return response
 </code>
 </pre>
 
