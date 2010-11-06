@@ -17,7 +17,7 @@ h2. HOW IT WORKS
 
 h3. LocalizedDateTimeField
 
-This field converts given datetime value to multivalue field which contains: DateTimeField and TimezoneField. TimezoneField is set by default to current global timezone and datetime value is converted from default timezone (settings.TIME_ZONE) to current value. After submit this process is reversed.
+This field converts given datetime value to multivalue field which contains: DateTimeField and TimezoneField. TimezoneField is set by default to current global timezone and datetime value is converted from default timezone (settings.TIME_ZONE) to selected timezone. After submit this process is reversed.
 
 There is also split (similar to SplitDateTimeField) version of this field (SplitLocalizedDateTimeField).
 
@@ -113,5 +113,5 @@ Add django_tz to INSTALLED_APPS and run ./manage.py test django_tz.
 
 h2. TODO
 
-* Session based timezone cache.
+* Session based timezone cache (similar to django.views.i18n).
 * DST ambiguity problem - there should be is_dst field (which can be ignored for most cases) in all form fields.
