@@ -9,9 +9,21 @@ django-tz manages timezones transitions in a manner similar to how django implem
 ,,What does this application do?''
 
 * It defines TimeZoneField which is taken from django-timezones (I've added default value guessing based on language code).
-* It provides global (per thread) timezone cache which can be easly updated by custom middleware.
+* It provides global (per thread) timezone cache which can be easily updated by custom middleware.
 * It defines LocalizedDateTimeField (+ some additional form fields) - which makes automatically transitions: settings.TIME_ZONE <-> current timezone.
 * It implements template filter to localize datetime values according to cache.
+
+h2. HOW IT WORKS
+
+h3. LocalizedDateTimeField
+
+This field converts given datetime value to multivalue field which contains: DateTimeField and TimezoneField. TimezoneField is set by default to current global timezone and datetime value is converted from default timezone (settings.TIME_ZONE) to current value. After submit this process is reversed.
+
+There is also split (similar to SplitDateTimeField) version of this field (SplitLocalizedDateTimeField).
+
+h3. to_global_timezone
+
+This template filter takes datetime value and assumes that is given in default timezone (settings.TIME_ZONE) and converts it to current global timezone value.
 
 h2. USAGE
 
@@ -93,6 +105,13 @@ TIME_ZONE='UTC'
 </code>
 </pre>
 
+I think it's better to keep all datetime values in UTC in database and convert them to other default timezone (for example with middleware and global cache).
+
 h2. TESTING
 
 Add django_tz to INSTALLED_APPS and run ./manage.py test django_tz.
+
+h2. TODO
+
+* Session based timezone cache.
+* DST ambiguity problem - there should be is_dst field (which can be ignored for most cases) in all form fields.
