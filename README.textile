@@ -109,7 +109,7 @@ I think it's better to keep all datetime values in UTC in database and convert t
 
 h2. TESTING
 
-Add django_tz to INSTALLED_APPS and run ./manage.py test django_tz.
+Add django_tz to INSTALLED_APPS and include django_tz.urls your url patterns (there are some tests for views) and run ./manage.py test django_tz.
 
 h2. TODO
 

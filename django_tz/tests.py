@@ -6,6 +6,8 @@ import pytz
 
 from django import forms
 from django.conf import settings
+from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.forms.models import model_to_dict
 from django.forms.widgets import HiddenInput
@@ -55,11 +57,11 @@ class UtilsTestCase(TimeZoneTestCase):
         try:
             request = HttpRequest()
             request.META['HTTP_ACCEPT_LANGUAGE'] = 'en-ca,en;q=0.8,en-us;q=0.6,de-de;q=0.4,de;q=0.2'
-            middleware.TimezoneMiddleware().process_request(request)
+            middleware.TimezoneFromLangMiddleware().process_request(request)
             self.assertEqual(global_tz.get_timezone(), pytz.country_timezones['ca'][0])
 
             request.META['HTTP_ACCEPT_LANGUAGE'] = 'pl,en;q=0.8,en-us;q=0.6,de-de;q=0.4,de;q=0.2'
-            middleware.TimezoneMiddleware().process_request(request)
+            middleware.TimezoneFromLangMiddleware().process_request(request)
             self.assertEqual(global_tz.get_timezone(), pytz.country_timezones['pl'][0])
         finally:
             global_tz.deactivate()
@@ -87,17 +89,6 @@ class TimeZoneFieldTestCase(TimeZoneTestCase):
             f.clean("BAD VALUE")
         except forms.ValidationError, e:
             self.assertEqual(e.messages, ["Select a valid choice. BAD VALUE is not one of the available choices."])
-
-    def test_models_as_a_form(self):
-        class ProfileForm(forms.ModelForm):
-            class Meta:
-                model = Profile
-        form = ProfileForm()
-        rendered = form.as_p()
-        self.assert_(
-            bool(re.search(r'<option value="[\w/]+">\([A-Z]+(?:\+|\-)\d{4}\)\s[\w/]+</option>', rendered)),
-            "Did not find pattern in rendered form"
-        )
 
     def test_models_modelform_validation(self):
         class ProfileForm(forms.ModelForm):
@@ -137,7 +128,31 @@ class TimeZoneFieldTestCase(TimeZoneTestCase):
         qs = Profile.objects.filter(timezone=pytz.timezone("America/Denver"))
         self.assertEqual(qs.count(), 1)
 
-class TimeZoneDateTimeFieldsTests(TimeZoneTestCase):
+class ViewsTestCase(TimeZoneTestCase):
+    def setUp(self):
+        User.objects.create_user(username='test', password='test', email='test@example.com')
+        self.ORIGINAL_MIDDLEWARE_CLASSES = settings.MIDDLEWARE_CLASSES
+        settings.MIDDLEWARE_CLASSES = list(settings.MIDDLEWARE_CLASSES)
+        if not 'django_tz.middleware.TimezoneFromLangMiddleware' in settings.MIDDLEWARE_CLASSES:
+            settings.MIDDLEWARE_CLASSES.append('django_tz.middleware.TimezoneFromLangMiddleware')
+        self.client.handler.load_middleware()
+
+    def tearDown(self):
+        settings.MIDDLEWARE_CLASSES = self.ORIGINAL_MIDDLEWARE_CLASSES
+
+    def test_set_timezone_on_session(self):
+        self.client.login(username='test', password='test')
+        self.assertFalse('django_timezone' in self.client.session)
+
+        tz_name_1 = 'Europe/Warsaw'
+        response = self.client.post(reverse('django_tz_set_timezone'), data={'timezone': tz_name_1})
+        self.assertTrue(self.client.session['django_timezone'], pytz.timezone(tz_name_1))
+
+        tz_name_2 = 'America/Denver'
+        response = self.client.post(reverse('django_tz_set_timezone'), data={'timezone': tz_name_2})
+        self.assertTrue(self.client.session['django_timezone'], pytz.timezone(tz_name_2))
+
+class TimeZoneDateTimeFieldsTestCase(TimeZoneTestCase):
     def test_timezonedatetimefield_processing(self):
         class ProfileForm(forms.ModelForm):
             joined = tz_forms.TimeZoneDateTimeField()

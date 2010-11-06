@@ -15,7 +15,7 @@ from . import global_tz
 class TimeZoneField(forms.TypedChoiceField):
     def __init__(self, *args, **kwargs):
         if not "choices" in kwargs:
-            kwargs["choices"] = zones.PRETTY_TIMEZONE_CHOICES
+            kwargs["choices"] = zones.ALL_TIMEZONE_CHOICES
         kwargs["coerce"] = coerce_timezone_value
         super(TimeZoneField, self).__init__(*args, **kwargs)
 
@@ -150,3 +150,8 @@ class SplitLocalizedDateTimeField(MultiValueField):
                             pytz.timezone(settings.TIME_ZONE)).replace(tzinfo=None)
             return result
         return None
+
+class TimeZoneForm(forms.Form):
+    """Simple one field form used by middleware and in views."""
+    timezone = TimeZoneField()
+
