@@ -47,7 +47,7 @@ Now we want to switch timezone according to user settings for every request. Thi
 
 <pre>
 <code>
-from django_tz.middleware import GlobalTimezoneMiddleware, get_
+from django_tz.middleware import GlobalTimezoneMiddleware, get_tz_from_request
 
 class ProfileTimezoneMiddleware(GlobalTimezoneMiddleware):
     def get_tz(sefl, request):
@@ -55,9 +55,7 @@ class ProfileTimezoneMiddleware(GlobalTimezoneMiddleware):
             profile = request.user.get_profile()
             return profile.timezone
 
-        #try current session timezone setting at first
-        tz = get_tz_from_request(request)
-        return tz
+        return get_tz_from_request(request)
 
 </code>
 </pre>
