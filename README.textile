@@ -18,7 +18,7 @@ h2. HOW DOES IT WORK?
 
 h3. LocalizedDateTimeField
 
-This field converts given datetime value to multivalue field which contains: DateTimeField and TimezoneField. TimezoneField is set by default to current global timezone and datetime value is converted from default timezone (settings.TIME_ZONE) to selected timezone. After submit this process is reversed.
+This multivalue form field decompresses given datetime value to datetime and timezone. It contains: DateTimeField and TimezoneField. TimezoneField is set by default to current global timezone (if given value has empty tzinfo) and datetime value is converted from default timezone (settings.TIME_ZONE) to selected timezone. After form submit this process is reversed.
 
 There is also split (similar to SplitDateTimeField) version of this field (SplitLocalizedDateTimeField).
 
@@ -28,7 +28,7 @@ This template filter takes datetime value and assumes that is given in default t
 
 h3. set_timezone
 
-There is simple view which is nearly copy of django.views.i18n.set_language. It caches timezone in session or cookie. Default middleware uses it to determine current timezone.
+This is simple view which is nearly copy of django.views.i18n.set_language. It caches timezone in session or cookie. Default middleware uses it to determine current timezone.
 
 h2. USAGE
 
@@ -44,6 +44,7 @@ class Profile(models.Model):
 
 class MeetUp(models.Model):
     start = models.DatetTimeField()
+    user = models.ForeignKey(editable=False)
 </code>
 </pre>
 
@@ -82,6 +83,24 @@ class MeetUpForm(forms.ModelForm):
     start = LocalizedDateTimeField()
     class Model:
         model = MeetUp
+</code>
+</pre>
+
+
+This form renders as follows:
+
+<pre>
+<code>
+<p>
+<label for="id_joined_0">Joined:</label>
+<input type="text" name="joined_0" id="id_joined_0" />
+
+<select name="joined_1" id="id_joined_1">
+<option value="Africa/Abidjan">Africa/Abidjan</option>
+<option value="Africa/Accra">Africa/Accra</option>
+...
+</select>
+</p>
 </code>
 </pre>
 
