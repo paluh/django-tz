@@ -8,7 +8,7 @@ django-tz manages timezones transitions in a manner similar to how django implem
 
 ,,What does this application do?''
 
-* It defines TimeZoneField which is taken from django-timezones (I've added default value guessing based on language code).
+* It defines TimeZoneField which is taken from django-timezones.
 * It provides global (per thread) timezone cache which can be easily updated by custom middleware.
 * It defines LocalizedDateTimeField (+ some additional form fields) - which makes automatically transitions: settings.TIME_ZONE <--> current timezone.
 * It implements template filter to localize datetime values according to cache.
