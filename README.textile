@@ -4,7 +4,7 @@ h2. OVERVIEW
 
 This app is derived from brosner/django-timezones application (http://github.com/brosner/django-timezones). It takes different approach to timezones localization, so I've separated those two apps for clarity.
 
-django-tz manages timezones transitions in a manner similar to how django implements language switching. Timezone is stored in global cache and datetime values can be ,,localized'' according to it in templates with custom template filter or in forms with custom form fields.
+django-tz manages timezones transitions in a manner similar to how django implements language switching. Timezone is stored in global cache and datetime values can be ,,localized'' according to it in templates with custom template filter or in forms with custom form fields. Because timezone localization works through form fields and template filter you can easily add it to an existing app.
 
 ,,What does this application do?''
 
@@ -14,7 +14,7 @@ django-tz manages timezones transitions in a manner similar to how django implem
 * It implements template filter to localize datetime values according to cache.
 * It defines set_timezone view which stores given timezone in session or cookie.
 
-h2. HOW IT WORKS
+h2. HOW DOES IT WORK?
 
 h3. LocalizedDateTimeField
 
@@ -25,6 +25,10 @@ There is also split (similar to SplitDateTimeField) version of this field (Split
 h3. to_global_timezone
 
 This template filter takes datetime value and assumes that is given in default timezone (settings.TIME_ZONE) and converts it to current global timezone value.
+
+h3. set_timezone
+
+There is simple view which is nearly copy of django.views.i18n.set_language. It caches timezone in session or cookie. Default middleware uses it to determine current timezone.
 
 h2. USAGE
 
@@ -110,5 +114,4 @@ Add django_tz to INSTALLED_APPS and include django_tz.urls your url patterns (th
 
 h2. TODO
 
-* Session based timezone cache (similar to django.views.i18n).
 * DST ambiguity problem - there should be is_dst field (which can be ignored for most cases) in all form fields.
