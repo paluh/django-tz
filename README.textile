@@ -92,10 +92,10 @@ This form renders as follows:
 <pre>
 <code>
 <p>
-<label for="id_joined_0">Joined:</label>
-<input type="text" name="joined_0" id="id_joined_0" />
+<label for="id_start_0">Start:</label>
+<input type="text" name="start_0" id="id_start_0" />
 
-<select name="joined_1" id="id_joined_1">
+<select name="start_1" id="id_start_1">
 <option value="Africa/Abidjan">Africa/Abidjan</option>
 <option value="Africa/Accra">Africa/Accra</option>
 ...
