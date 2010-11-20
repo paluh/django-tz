@@ -79,7 +79,8 @@ class LocalizedDateTimeWidget(TimeZoneDateTimeWidget):
                 value = pytz.timezone(settings.TIME_ZONE).localize(value)
             tz = self.get_timezone(value)
             value = adjust_datetime_to_timezone(value, value.tzinfo, tz)
-        return super(LocalizedDateTimeWidget, self).decompress(value)
+            return super(LocalizedDateTimeWidget, self).decompress(value)
+        return [None, self.get_timezone(value)]
 
 class LocalizedDateTimeField(TimeZoneDateTimeField):
     """
@@ -100,7 +101,7 @@ class SplitLocalizedDateTimeWidget(LocalizedDateTimeWidget):
         splited = super(SplitLocalizedDateTimeWidget, self).decompress(value)
         if splited[0]:
             return [splited[0].date(), splited[0].time().replace(microsecond=0), splited[1]]
-        return [None, None, None]
+        return [None, None, splited[1]]
 
 class SplitLocalizedDateTimeField(MultiValueField):
     widget = SplitLocalizedDateTimeWidget
