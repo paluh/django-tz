@@ -59,6 +59,6 @@ class TimeZoneField(models.CharField):
 try:
     from south.modelsinspector import add_introspection_rules
     add_introspection_rules(rules=[((TimeZoneField, ), [], {'max_length': ('max_length', {'default': MAX_TIMEZONE_LENGTH}),}),],
-                                patterns=['timezones\.fields\.'])
+                                patterns=['django_tz\.fields\.'])
 except ImportError:
     pass
