@@ -1,4 +1,8 @@
-from django.utils.thread_support import currentThread
+try:
+    from threading import currentThread
+except ImportError:
+    from dummy_threading import currentThread
+
 from . import utils
 
 _active = {}
