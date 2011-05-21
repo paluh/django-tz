@@ -43,7 +43,7 @@ class Profile(models.Model):
     timezone = models.TimeZoneField()
 
 class MeetUp(models.Model):
-    start = models.DatetTimeField()
+    start = models.DateTimeField()
     user = models.ForeignKey(editable=False)
 </code>
 </pre>
@@ -55,7 +55,7 @@ Now we want to switch timezone according to user settings for every request. Thi
 from django_tz.middleware import GlobalTimezoneMiddleware, get_tz_from_request
 
 class ProfileTimezoneMiddleware(GlobalTimezoneMiddleware):
-    def get_tz(sefl, request):
+    def get_tz(self, request):
         if hasattr(request, 'user') and request.user.is_authenticated():
             profile = request.user.get_profile()
             return profile.timezone

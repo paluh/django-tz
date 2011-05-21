@@ -4,7 +4,8 @@ import pytz
 from django import forms
 from django.conf import settings
 from django.core import validators
-from django.forms.widgets import SplitDateTimeWidget, DateTimeInput, MultiWidget, Select
+from django.core.exceptions import ValidationError
+from django.forms.widgets import MultiWidget
 from django.forms.fields import MultiValueField, DateField, TimeField
 from django.utils.translation import ugettext_lazy as _
 
