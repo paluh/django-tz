@@ -226,7 +226,7 @@ class TimeZoneDateTimeFieldsTestCase(TimeZoneTestCase):
         self.assertEqual(profile.joined,
                          adjust_datetime_to_timezone(joined, tz, pytz.timezone(settings.TIME_ZONE)).replace(tzinfo=None))
 
-    def test_non_required_splitimezonedatetimefield_ignores_tz_value_when_others_are_empty(self):
+    def test_non_required_splitimezonedatetimefield_validates_when_value_is_empty(self):
         class ProfileForm(forms.ModelForm):
             joined = tz_forms.SplitLocalizedDateTimeField(required=False)
             class Meta:
