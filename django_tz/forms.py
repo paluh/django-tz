@@ -57,6 +57,13 @@ class TimeZoneDateTimeField(MultiValueField):
             self.widget = self.widget((dtw, tzw))
         super(TimeZoneDateTimeField, self).__init__(fields, *args, **kwargs)
 
+    def clean(self, value):
+        # validate subfields only when datetime value is not empty
+        if (isinstance(value, (list, tuple)) and
+            (not value or not [v for v in value[:-1] if v not in validators.EMPTY_VALUES])):
+            return super(TimeZoneDateTimeField, self).clean([])
+        return super(TimeZoneDateTimeField, self).clean(value)
+
     def compress(self, data_list):
         if data_list:
             # Raise a validation error if time or date is empty
@@ -133,6 +140,13 @@ class SplitLocalizedDateTimeField(MultiValueField):
         if isinstance(self.widget, type):
             self.widget = self.widget((dw, tw, tzw))
         super(SplitLocalizedDateTimeField, self).__init__(fields, *args, **kwargs)
+
+    def clean(self, value):
+        # validate subfields only when date or time value are not empty
+        if (isinstance(value, (list, tuple)) and
+            (not value or not [v for v in value[:-1] if v not in validators.EMPTY_VALUES])):
+            return super(SplitLocalizedDateTimeField, self).clean([])
+        return super(SplitLocalizedDateTimeField, self).clean(value)
 
     def compress(self, data_list):
         if data_list:

@@ -20,7 +20,7 @@ from . import forms as tz_forms
 from . import global_tz
 from . import middleware
 
-from .utils import adjust_datetime_to_timezone, guess_tz_from_lang
+from .utils import adjust_datetime_to_timezone
 
 #model for tests
 class Profile(models.Model):
@@ -145,12 +145,13 @@ class ViewsTestCase(TimeZoneTestCase):
         self.assertFalse('django_timezone' in self.client.session)
 
         tz_name_1 = 'Europe/Warsaw'
-        response = self.client.post(reverse('django_tz_set_timezone'), data={'timezone': tz_name_1})
+        self.client.post(reverse('django_tz_set_timezone'), data={'timezone': tz_name_1})
         self.assertTrue(self.client.session['django_timezone'], pytz.timezone(tz_name_1))
 
         tz_name_2 = 'America/Denver'
-        response = self.client.post(reverse('django_tz_set_timezone'), data={'timezone': tz_name_2})
+        self.client.post(reverse('django_tz_set_timezone'), data={'timezone': tz_name_2})
         self.assertTrue(self.client.session['django_timezone'], pytz.timezone(tz_name_2))
+
 
 class TimeZoneDateTimeFieldsTestCase(TimeZoneTestCase):
     def test_timezonedatetimefield_processing(self):
@@ -163,6 +164,7 @@ class TimeZoneDateTimeFieldsTestCase(TimeZoneTestCase):
         joined = datetime(2010, 10, 28, 19)
         profile = Profile.objects.create(name="Tomasz Rybarczyk", joined=joined)
         form = ProfileForm(instance=profile, data={'joined_0': joined, 'joined_1': 'Europe/Warsaw'})
+        self.assertTrue(form.is_valid())
         profile = form.save()
         tz = pytz.timezone('Europe/Warsaw')
         self.assertEqual(profile.joined, tz.localize(joined))
@@ -218,10 +220,60 @@ class TimeZoneDateTimeFieldsTestCase(TimeZoneTestCase):
         joined = datetime(2010, 10, 28, 18)
         form = ProfileForm(instance=profile, data={'joined_0': joined.date(),
                     'joined_1': joined.time().replace(microsecond=0), 'joined_2': 'Europe/Warsaw'})
-        form.is_valid()
+        self.assertTrue(form.is_valid())
         profile = form.save()
         tz = pytz.timezone('Europe/Warsaw')
-        self.assertEqual(profile.joined, adjust_datetime_to_timezone(joined, tz, pytz.timezone(settings.TIME_ZONE)).replace(tzinfo=None))
+        self.assertEqual(profile.joined,
+                         adjust_datetime_to_timezone(joined, tz, pytz.timezone(settings.TIME_ZONE)).replace(tzinfo=None))
+
+    def test_non_required_splitimezonedatetimefield_ignores_tz_value_when_others_are_empty(self):
+        class ProfileForm(forms.ModelForm):
+            joined = tz_forms.SplitLocalizedDateTimeField(required=False)
+            class Meta:
+                fields = ('joined',)
+                model = Profile
+
+        joined = datetime(2010, 10, 28, 19)
+        profile = Profile.objects.create(name="Tomasz Rybarczyk", joined=joined)
+
+        form = ProfileForm(instance=profile, data={'joined_0': '', 'joined_1': '', 'joined_2': ''})
+        self.assertTrue(form.is_valid())
+        profile = form.save()
+        self.assertEqual(profile.joined, None)
+
+    def test_non_required_splitimezonedatetimefield_ignores_tz_value_when_others_are_empty(self):
+        class ProfileForm(forms.ModelForm):
+            joined = tz_forms.SplitLocalizedDateTimeField(required=False)
+            class Meta:
+                fields = ('joined',)
+                model = Profile
+
+        joined = datetime(2010, 10, 28, 19)
+        profile = Profile.objects.create(name="Tomasz Rybarczyk", joined=joined)
+
+        # ignore timezone value in validation
+        form = ProfileForm(instance=profile, data={'joined_0': '', 'joined_1': '', 'joined_2': 'Europe/Warsaw'})
+        self.assertTrue(form.is_valid())
+        profile = form.save()
+        self.assertEqual(profile.joined, None)
+
+    def test_non_required_splitimezonedatetimefield_doesnt_validate_when_date_or_time_is_empty(self):
+        class ProfileForm(forms.ModelForm):
+            joined = tz_forms.SplitLocalizedDateTimeField(required=False)
+            class Meta:
+                fields = ('joined',)
+                model = Profile
+
+        joined = datetime(2010, 10, 28, 19)
+        profile = Profile.objects.create(name="Tomasz Rybarczyk", joined=joined)
+
+        joined = datetime(2010, 10, 28, 18)
+        form = ProfileForm(instance=profile, data={'joined_0': '',
+                    'joined_1': joined.time().replace(microsecond=0), 'joined_2': 'Europe/Warsaw'})
+        self.assertFalse(form.is_valid())
+        form = ProfileForm(instance=profile, data={'joined_0': joined.date(),
+                    'joined_1': '', 'joined_2': 'Europe/Warsaw'})
+        self.assertFalse(form.is_valid())
 
     def test_splitimezonedatetimefield_display_with_hidden_timezone(self):
         g_tz = pytz.timezone('Europe/Warsaw')
