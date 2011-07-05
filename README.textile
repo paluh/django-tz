@@ -22,7 +22,7 @@ This multivalue form field decompresses given datetime value to datetime and tim
 
 There is also split (similar to SplitDateTimeField) version of this field (SplitLocalizedDateTimeField).
 
-h3. to_global_timezone
+h3. to_global_tz
 
 This template filter takes datetime value and assumes that is given in default timezone (settings.TIME_ZONE) and converts it to current global timezone value.
 
