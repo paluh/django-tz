@@ -1,11 +1,10 @@
-import re
-
 from datetime import datetime
 
 import pytz
 
 from django import forms
 from django.conf import settings
+from django.conf.urls.defaults import patterns, url
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db import models
@@ -17,6 +16,7 @@ from .fields import TimeZoneField
 from . import forms as tz_forms
 from . import global_tz
 from . import middleware
+from . import views
 
 from .utils import adjust_datetime_to_timezone
 
@@ -88,6 +88,10 @@ class TimeZoneFieldTestCase(TimeZoneTestCase):
         except forms.ValidationError, e:
             self.assertEqual(e.messages, ["Select a valid choice. BAD VALUE is not one of the available choices."])
 
+    def test_default_timezone_save(self):
+        profile = Profile.objects.create(name='test', joined=datetime.now())
+        self.assertEqual(profile.timezone, global_tz.get_timezone())
+
     def test_models_modelform_validation(self):
         class ProfileForm(forms.ModelForm):
             class Meta:
@@ -127,6 +131,12 @@ class TimeZoneFieldTestCase(TimeZoneTestCase):
         self.assertEqual(qs.count(), 1)
 
 class ViewsTestCase(TimeZoneTestCase):
+    class urls:
+        urlpatterns = patterns('',
+            url(r'^$', views.set_timezone,
+                name='django-tz-set-timezone')
+        )
+
     def setUp(self):
         User.objects.create_user(username='test', password='test', email='test@example.com')
         self.ORIGINAL_MIDDLEWARE_CLASSES = settings.MIDDLEWARE_CLASSES
@@ -143,11 +153,11 @@ class ViewsTestCase(TimeZoneTestCase):
         self.assertFalse('django_timezone' in self.client.session)
 
         tz_name_1 = 'Europe/Warsaw'
-        self.client.post(reverse('django_tz_set_timezone'), data={'timezone': tz_name_1})
+        self.client.post(reverse('django-tz-set-timezone'), data={'timezone': tz_name_1})
         self.assertTrue(self.client.session['django_timezone'], pytz.timezone(tz_name_1))
 
         tz_name_2 = 'America/Denver'
-        self.client.post(reverse('django_tz_set_timezone'), data={'timezone': tz_name_2})
+        self.client.post(reverse('django-tz-set-timezone'), data={'timezone': tz_name_2})
         self.assertTrue(self.client.session['django_timezone'], pytz.timezone(tz_name_2))
 
 
