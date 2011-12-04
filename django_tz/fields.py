@@ -1,13 +1,9 @@
-import datetime
-import pytz
-
 from django.conf import settings
 from django.db import models
-from django.db.models import signals
 from django.utils.encoding import smart_unicode, smart_str
 
-from . import forms, zones
-from .utils import coerce_timezone_value, validate_timezone_max_length, adjust_datetime_to_timezone
+from . import zones
+from .utils import coerce_timezone_value, validate_timezone_max_length
 from . import global_tz
 
 MAX_TIMEZONE_LENGTH = getattr(settings, "MAX_TIMEZONE_LENGTH", 100)

@@ -9,11 +9,9 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db import models
-from django.forms.models import model_to_dict
 from django.forms.widgets import HiddenInput
 from django.http import HttpRequest
 from django.test import TestCase
-from django.utils import translation
 
 from .fields import TimeZoneField
 from . import forms as tz_forms
