@@ -129,7 +129,7 @@ I think it's better to keep all datetime values in UTC in database and convert t
 
 h2. TESTING
 
-Just add django_tz to INSTALLED_APPS and <code>run ./manage.py test django_tz</code>.
+Just add django_tz to INSTALLED_APPS and run: <code>./manage.py test django_tz</code>.
 
 h2. TODO
 
