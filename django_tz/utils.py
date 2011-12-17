@@ -24,12 +24,6 @@ def coerce_timezone_value(value):
     except pytz.UnknownTimeZoneError:
         raise ValidationError("Unknown timezone")
 
-def validate_timezone_max_length(max_length, zones):
-    def reducer(x, y):
-        return x and (len(y) <= max_length)
-    if not reduce(reducer, zones, True):
-        raise Exception("timezones.fields.TimeZoneField MAX_TIMEZONE_LENGTH is too small")
-
 def guess_tz_from_lang(language_code):
     country_code = language_code.split('-', 1)[1] if '-' in language_code else language_code
     if country_code in pytz.country_timezones:
