@@ -53,12 +53,15 @@ class TimeZoneField(models.CharField):
 
 try:
     from south.modelsinspector import add_introspection_rules
-    converter = lambda v: v.zone if isinstance(v, pytz.tzinfo.tzinfo) else v
-    add_introspection_rules(rules=[((TimeZoneField, ),
-                                    [],
-                                    {'max_length': ('max_length', {}),
-                                     'default': ('default',
-                                                 {'converter': converter})}),],
-                                patterns=['django_tz\.fields\.'])
+    add_introspection_rules(
+        rules=[
+            ((TimeZoneField, ), [], {
+              'max_length': ('max_length', {}),
+              'default': ('default',
+                          {'converter': (lambda v: v.zone if isinstance(v, pytz.tzinfo.tzinfo) else v)})
+            })
+        ],
+        patterns=['django_tz\.fields\.']
+    )
 except ImportError:
     pass
