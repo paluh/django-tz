@@ -1,20 +1,19 @@
-from django.conf import settings
+import pytz.tzinfo
+
 from django.db import models
 from django.utils.encoding import smart_unicode, smart_str
 
 from . import zones
-from .utils import coerce_timezone_value, validate_timezone_max_length
 from . import global_tz
+from .utils import coerce_timezone_value
 
-MAX_TIMEZONE_LENGTH = getattr(settings, "MAX_TIMEZONE_LENGTH", 100)
 
 class TimeZoneField(models.CharField):
     __metaclass__ = models.SubfieldBase
 
     def __init__(self, *args, **kwargs):
-        validate_timezone_max_length(MAX_TIMEZONE_LENGTH, zones.ALL_TIMEZONE_CHOICES)
         defaults = {
-            "max_length": MAX_TIMEZONE_LENGTH,
+            "max_length": max(len(v) for (v,n) in zones.ALL_TIMEZONE_CHOICES),
             "default": global_tz.get_timezone,
             "choices": zones.ALL_TIMEZONE_CHOICES
         }
@@ -54,7 +53,12 @@ class TimeZoneField(models.CharField):
 
 try:
     from south.modelsinspector import add_introspection_rules
-    add_introspection_rules(rules=[((TimeZoneField, ), [], {'max_length': ('max_length', {'default': MAX_TIMEZONE_LENGTH}),}),],
+    converter = lambda v: v.zone if isinstance(v, pytz.tzinfo.tzinfo) else v
+    add_introspection_rules(rules=[((TimeZoneField, ),
+                                    [],
+                                    {'max_length': ('max_length', {}),
+                                     'default': ('default',
+                                                 {'converter': converter})}),],
                                 patterns=['django_tz\.fields\.'])
 except ImportError:
     pass

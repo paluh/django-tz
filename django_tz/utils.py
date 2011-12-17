@@ -3,7 +3,6 @@ import pytz
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.encoding import smart_str
-from django.utils import translation
 
 def adjust_datetime_to_timezone(value, from_tz, to_tz=None):
     """
