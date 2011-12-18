@@ -26,6 +26,6 @@ def coerce_timezone_value(value):
 
 def guess_tz_from_lang(language_code):
     country_code = language_code.split('-', 1)[1] if '-' in language_code else language_code
-    if country_code in pytz.country_timezones:
+    if country_code.upper() in pytz.country_timezones:
         return pytz.country_timezones[country_code][0]
     return None
