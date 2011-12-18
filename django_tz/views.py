@@ -22,6 +22,6 @@ def set_timezone(request):
                 session_name = getattr(settings, 'TIMEZONE_SESSION_NAME', 'django_timezone')
                 request.session[session_name] = form.cleaned_data['timezone']
             else:
-                cookie_name = getattr(settings.TIMEZONE_COOKIE_NAME, 'TIMEZONE')
-                response.set_cookie(cookie_name, form.data['timezone'])
+                cookie_name = getattr(settings, 'TIMEZONE_COOKIE_NAME', 'TIMEZONE')
+                response.set_cookie(cookie_name, form.cleaned_data['timezone'])
     return response
