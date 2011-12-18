@@ -1,3 +1,4 @@
+import BeautifulSoup
 from datetime import datetime
 
 import pytz
@@ -193,9 +194,12 @@ class TimeZoneDateTimeFieldsTestCase(TimeZoneTestCase):
             profile = Profile.objects.create(name="Tomasz Rybarczyk", joined=joined)
             form = ProfileForm(instance=profile)
             #because global_tz is Europe/Warsaw values should be localized to this
-            form_html = form.as_p()
-            self.assertTrue('<input type="text" name="joined_0" value="2010-10-28 21:00:00"' in form_html)
-            self.assertTrue('<option value="Europe/Warsaw" selected="selected">' in form_html)
+            form_soup = BeautifulSoup.BeautifulSoup(form.as_p())
+            time_initial = form_soup.find('input', attrs={'name':'joined_0'})['value']
+            self.assertEqual(time_initial, "2010-10-28 21:00:00")
+
+            time_initial = form_soup.find('option', selected='selected')['value']
+            self.assertEqual(time_initial, "Europe/Warsaw")
         finally:
             global_tz.deactivate()
 
@@ -299,8 +303,46 @@ class TimeZoneDateTimeFieldsTestCase(TimeZoneTestCase):
             profile = Profile.objects.create(name="Tomasz Rybarczyk", joined=joined)
             form = ProfileForm(instance=profile)
             #because global_tz is Europe/Warsaw values should be localized to this
-            form_html = form.as_p()
-            self.assertTrue('<input type="hidden" name="joined_2" value="Europe/Warsaw"' in form_html)
+            form_soup = BeautifulSoup.BeautifulSoup(form.as_p())
+            initial = form_soup.find('input', attrs={'name':'joined_2'})['value']
+            self.assertEqual(initial, "Europe/Warsaw")
         finally:
             global_tz.deactivate()
+
+    def test_default_timezone_value_in_formfield(self):
+        original_timezone = getattr(settings, 'TIME_ZONE')
+        settings.TIME_ZONE = 'Europe/Warsaw'
+        try:
+            class ProfileForm(forms.ModelForm):
+                class Meta:
+                    fields = ('timezone',)
+                    model = Profile
+            form = ProfileForm()
+            form_html = form.as_p()
+            form_soup = BeautifulSoup.BeautifulSoup(form_html)
+            initial = form_soup.find('option', selected='selected')['value']
+            self.assertEqual(initial,
+                             settings.TIME_ZONE)
+        finally:
+            settings.TIME_ZONE = original_timezone
+
+    def test_default_timezone_value_in_hidden_formfield(self):
+        original_timezone = getattr(settings, 'TIME_ZONE')
+        settings.TIME_ZONE = 'Europe/Warsaw'
+        try:
+            class ProfileForm(forms.ModelForm):
+                class Meta:
+                    fields = ('timezone',)
+                    model = Profile
+                    widgets = {
+                        'timezone': forms.HiddenInput
+                    }
+            form = ProfileForm()
+            form_html = form.as_p()
+            form_soup = BeautifulSoup.BeautifulSoup(form_html)
+            initial = form_soup.find('input', id='id_timezone')['value']
+            self.assertEqual(initial,
+                             settings.TIME_ZONE)
+        finally:
+            settings.TIME_ZONE = original_timezone
 

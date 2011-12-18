@@ -3,8 +3,9 @@ import pytz.tzinfo
 from django.db import models
 from django.utils.encoding import smart_unicode, smart_str
 
-from . import zones
+from . import forms
 from . import global_tz
+from . import zones
 from .utils import coerce_timezone_value
 
 
@@ -50,6 +51,9 @@ class TimeZoneField(models.CharField):
         if value is None:
             value = ""
         return {self.attname: smart_unicode(value)}
+
+    def formfield(self, form_class=forms.TimeZoneField, **kwargs):
+        return super(TimeZoneField, self).formfield(form_class=form_class, **kwargs)
 
 try:
     from south.modelsinspector import add_introspection_rules
