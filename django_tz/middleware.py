@@ -16,7 +16,7 @@ def get_tz_from_request(request):
         if tz and isinstance(tz, datetime.tzinfo):
             return tz
 
-    cookie_name = getattr(settings, 'TIMEZONE_COOKIE_NAME', 'TIME_ZONE')
+    cookie_name = getattr(settings, 'TIMEZONE_COOKIE_NAME', 'TIMEZONE')
     form = TimeZoneForm({'timezone': request.COOKIES.get(cookie_name, None)})
     if form.is_valid():
         return form.cleaned_data['timezone']
