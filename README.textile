@@ -2,7 +2,7 @@ h1. django_tz
 
 h2. WARNING
 
-Usage of this app is deprecated - native time zones support was introduced in Django 1.4 (https://docs.djangoproject.com/en/dev/topics/i18n/timezones/).
+This app is deprecated - native time zones support was introduced in Django 1.4 (https://docs.djangoproject.com/en/dev/topics/i18n/timezones/).
 
 h2. OVERVIEW
 
